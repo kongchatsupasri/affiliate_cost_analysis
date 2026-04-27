@@ -3,121 +3,120 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Affiliate Analyzer</title>
+  <title>Affiliate Profit Analyzer</title>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    :root{--bg:#111;--surface:#1a1a1a;--border:#2a2a2a;--text:#e5e5e5;--muted:#888;--shopee:#f97316;--tiktok:#a78bfa;--lazada:#38bdf8;--error:#f87171;--success:#4ade80}
-    body{background:var(--bg);color:var(--text);font-family:'Sarabun',sans-serif;font-size:15px;min-height:100vh}
-    .wrap{max-width:820px;margin:0 auto;padding:0 1.5rem}
-    header{padding:2.5rem 0 2rem;border-bottom:1px solid var(--border)}
-    header h1{font-size:1.4rem;font-weight:700;color:#fff;margin-bottom:.3rem}
-    header p{color:var(--muted);font-size:.9rem}
-    .upload-section{padding:2rem 0}
-    .upload-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin-bottom:1rem}
-    .upload-card{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:1rem;transition:border-color .15s}
-    .upload-card.has-files{border-color:var(--success)}
-    .platform-label{font-size:.78rem;font-weight:600;color:var(--muted);margin-bottom:.6rem;display:flex;align-items:center;gap:.4rem;text-transform:uppercase;letter-spacing:.05em}
-    .dot{width:7px;height:7px;border-radius:50%;display:inline-block}
-    .upload-area{position:relative;border:1px dashed var(--border);border-radius:4px;padding:.9rem;text-align:center;cursor:pointer;transition:border-color .15s}
-    .upload-area:hover{border-color:#555}
-    .upload-area input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-    .upload-area p{font-size:.8rem;color:var(--muted)}
-    .file-count{display:none;font-size:.75rem;color:var(--success);margin-top:.5rem;text-align:center}
-    .upload-card.has-files .file-count{display:block}
-    .btn-analyze{width:100%;padding:.85rem;background:#fff;color:#111;border:none;border-radius:6px;font-family:'Sarabun',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;transition:background .15s}
-    .btn-analyze:hover:not(:disabled){background:#e5e5e5}
-    .btn-analyze:disabled{background:var(--surface);color:var(--muted);cursor:not-allowed;border:1px solid var(--border)}
-    .status-bar{display:none;align-items:center;gap:.6rem;margin-top:.75rem;padding:.75rem 1rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;font-size:.85rem;color:var(--muted)}
-    .status-bar.visible{display:flex}
-    .spinner{width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--text);border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0}
-    .error-box{display:none;margin-top:.75rem;padding:.75rem 1rem;background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.25);border-radius:6px;font-size:.85rem;color:var(--error)}
-    .error-box.visible{display:block}
-    #results{display:none;padding-bottom:4rem}
-    #results.visible{display:block}
-    .section-title{font-size:1rem;font-weight:700;color:#fff;padding:1.75rem 0 1rem;border-top:1px solid var(--border)}
-    .charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1rem}
-    .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:1rem}
-    .chart-label{font-size:.78rem;color:var(--muted);margin-bottom:.5rem}
-    .ai-card{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:1.5rem}
-    .ai-card-header{font-size:.78rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:1px solid var(--border)}
-    #ai-output{font-size:.92rem;line-height:1.8}
-    #ai-output h1,#ai-output h2{font-size:1rem;font-weight:700;margin:1.25rem 0 .5rem;color:#fff}
-    #ai-output h3{font-size:.92rem;font-weight:600;margin:1rem 0 .4rem;color:#ccc}
-    #ai-output p{margin-bottom:.6rem}
-    #ai-output strong{color:#fff;font-weight:600}
-    #ai-output em{color:#aaa;font-style:italic}
-    #ai-output ul,#ai-output ol{padding-left:1.2rem;margin-bottom:.6rem}
-    #ai-output li{margin-bottom:.25rem}
-    #ai-output table{width:100%;border-collapse:collapse;margin:.75rem 0;font-size:.85rem}
-    #ai-output th{background:#222;color:#ccc;padding:.5rem .75rem;text-align:left;border:1px solid var(--border);font-weight:600}
-    #ai-output td{padding:.4rem .75rem;border:1px solid var(--border)}
-    #ai-output tr:nth-child(even) td{background:rgba(255,255,255,.02)}
-    #ai-output hr{border:none;border-top:1px solid var(--border);margin:1rem 0}
-    #ai-output code{font-size:.82rem;background:#222;padding:.1rem .3rem;border-radius:3px;color:#ccc}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    @media(max-width:600px){.upload-grid{grid-template-columns:1fr}.charts-grid{grid-template-columns:1fr}}
+    :root{--bg:#111;--surface:#1a1a1a;--border:#2a2a2a;--text:#e5e5e5;--muted:#888;--shopee:#f97316;--tiktok:#a78bfa;--lazada:#38bdf8}
+    body{background:var(--bg);color:var(--text);font-family:'Sarabun',sans-serif;margin:0;padding:2rem}
+    .container{max-width:900px;margin:0 auto}
+    .card{background:var(--surface);border:1px solid var(--border);padding:1.5rem;border-radius:12px;margin-bottom:1.5rem}
+    .btn{background:#fff;color:#000;border:none;padding:0.8rem 1.5rem;border-radius:8px;font-weight:700;cursor:pointer;width:100%}
+    .btn:disabled{opacity:0.5}
+    table{width:100%;border-collapse:collapse;margin-top:1rem}
+    th,td{padding:0.8rem;border-bottom:1px solid var(--border);text-align:left}
+    .status{color:var(--muted);font-size:0.9rem;margin-top:1rem}
+    pre{white-space:pre-wrap;word-wrap:break-word;background:#000;padding:1rem;border-radius:8px;line-height:1.6}
   </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <h1>Affiliate Analyzer</h1>
-    <p>วิเคราะห์ค่าใช้จ่าย Affiliate จาก Shopee, TikTok และ Lazada</p>
-  </header>
-  <section class="upload-section">
-    <div class="upload-grid">
-      <div class="upload-card" id="card-shopee">
-        <div class="platform-label"><span class="dot" style="background:var(--shopee)"></span>Shopee</div>
-        <div class="upload-area"><input type="file" accept=".xlsx" multiple id="input-shopee" onchange="handleFiles('shopee',this)"/><p>คลิกเพื่ออัพโหลด .xlsx</p></div>
-        <div class="file-count" id="count-shopee"></div>
+  <div class="container">
+    <h1>Profit Analyzer (Affiliate Focused)</h1>
+    <p style="color:var(--muted)">วิเคราะห์รูรั่วกำไรจากค่า Affiliate โดย AI</p>
+    
+    <div class="card">
+      <h3>อัปโหลดไฟล์รายงาน (Excel)</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin:1rem 0">
+        <div><label>Shopee (Income)</label><input type="file" id="file-shopee" multiple accept=".xlsx"></div>
+        <div><label>TikTok</label><input type="file" id="file-tiktok" multiple accept=".xlsx"></div>
+        <div><label>Lazada</label><input type="file" id="file-lazada" multiple accept=".xlsx"></div>
       </div>
-      <div class="upload-card" id="card-tiktok">
-        <div class="platform-label"><span class="dot" style="background:var(--tiktok)"></span>TikTok</div>
-        <div class="upload-area"><input type="file" accept=".xlsx" multiple id="input-tiktok" onchange="handleFiles('tiktok',this)"/><p>คลิกเพื่ออัพโหลด .xlsx</p></div>
-        <div class="file-count" id="count-tiktok"></div>
-      </div>
-      <div class="upload-card" id="card-lazada">
-        <div class="platform-label"><span class="dot" style="background:var(--lazada)"></span>Lazada</div>
-        <div class="upload-area"><input type="file" accept=".xlsx" multiple id="input-lazada" onchange="handleFiles('lazada',this)"/><p>คลิกเพื่ออัพโหลด .xlsx</p></div>
-        <div class="file-count" id="count-lazada"></div>
-      </div>
+      <button id="btn-run" class="btn" onclick="run()">วิเคราะห์แม่งเลย</button>
+      <div id="status" class="status"></div>
     </div>
-    <button class="btn-analyze" id="btn-analyze" disabled onclick="runAnalysis()">กรุณาอัปโหลดไฟล์เพื่อเริ่มวิเคราะห์</button>
-    <div class="status-bar" id="status-bar"><div class="spinner"></div><span id="status-text">กำลังประมวลผล...</span></div>
-    <div class="error-box" id="error-box"></div>
-  </section>
-  <section id="results">
-    <div class="section-title">ผลการวิเคราะห์</div>
-    <div class="charts-grid">
-      <div class="chart-card"><div class="chart-label">% ค่าใช้จ่าย Affiliate ต่อยอดขาย</div><div id="chart1" style="height:240px"></div></div>
-      <div class="chart-card"><div class="chart-label">% ออร์เดอร์ที่มาจาก Affiliate</div><div id="chart2" style="height:240px"></div></div>
+
+    <div id="output-card" class="card" style="display:none">
+      <h3>ผลการวิเคราะห์ข้อมูล</h3>
+      <div id="output-text"></div>
     </div>
-    <div class="ai-card">
-      <div class="ai-card-header">AI Business Consultant — ผลการวิเคราะห์</div>
-      <div id="ai-output"><span style="color:#888">⏳ กำลังวิเคราะห์...</span></div>
-    </div>
-  </section>
-</div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
-<script>
-const uploadedFiles={shopee:[],tiktok:[],lazada:[]};
-function handleFiles(p,i){uploadedFiles[p]=Array.from(i.files);const c=document.getElementById('card-'+p),n=document.getElementById('count-'+p);if(i.files.length>0){c.classList.add('has-files');n.textContent='✓ '+i.files.length+' ไฟล์'}else c.classList.remove('has-files');updateButton()}
-function updateButton(){const h=Object.values(uploadedFiles).some(f=>f.length>0),b=document.getElementById('btn-analyze');b.disabled=!h;b.textContent=h?'🚀 เริ่มวิเคราะห์ข้อมูล':'กรุณาอัปโหลดไฟล์เพื่อเริ่มวิเคราะห์'}
-function setStatus(m){document.getElementById('status-bar').classList.add('visible');document.getElementById('status-text').textContent=m}
-function hideStatus(){document.getElementById('status-bar').classList.remove('visible')}
-function showError(m){const e=document.getElementById('error-box');e.textContent='❌ '+m;e.classList.add('visible')}
-function hideError(){document.getElementById('error-box').classList.remove('visible')}
-function readExcel(file,sheet=null,skip=0){return new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>{try{const wb=XLSX.read(e.target.result,{type:'binary',cellDates:true}),s=sheet?wb.Sheets[sheet]:wb.Sheets[wb.SheetNames[0]];if(!s)return rej(new Error('Sheet not found'));res(XLSX.utils.sheet_to_json(s,{defval:null,range:skip}))}catch(e){rej(e)}};r.readAsBinaryString(file)})}
-function getWeek(d){let dt=d instanceof Date?d:new Date(d);if(isNaN(dt))return null;const day=dt.getDay(),diff=dt.getDate()-day+(day===0?-6:1),mon=new Date(dt.setDate(diff)),sun=new Date(mon);sun.setDate(mon.getDate()+6);const f=x=>x.toISOString().split('T')[0];return{week_start:f(mon),week_end:f(sun),key:f(mon)}}
-function grp(mapped,agg){const g={};for(const r of mapped){if(!g[r.wk])g[r.wk]={ws:r.ws,we:r.we,rows:[]};g[r.wk].rows.push(r)}return Object.entries(g).sort((a,b)=>a[0].localeCompare(b[0])).map(([k,v])=>agg(v))}
-async function processShopee(files){let rows=[];for(const f of files)rows=rows.concat(await readExcel(f,'Income',5));const isTH=rows[0]&&'ค่าคอมมิชชั่น AMS' in rows[0],isEN=rows[0]&&'AMS Commission Fee' in rows[0];if(!isTH&&!isEN)throw new Error('Format ไฟล์ Shopee ไม่ถูกต้อง');const mapped=rows.map(r=>{const w=getWeek(isTH?r['วันที่ทำการสั่งซื้อ']:r['Order Creation Date']);if(!w)return null;return{wk:w.key,ws:w.week_start,we:w.week_end,sale:(isTH?r['สินค้าราคาปกติ']:r['Original product price'])||0,disc:(isTH?r['ส่วนลดสินค้าจากผู้ขาย']:r['Your Seller product promotion'])||0,code:(isTH?r['โค้ดส่วนลดที่ออกโดยผู้ขาย']:r['Voucher Sponsored by Seller'])||0,aff:(isTH?r['ค่าคอมมิชชั่น AMS']:r['AMS Commission Fee'])||0}}).filter(Boolean);return grp(mapped,v=>{const s=v.rows.reduce((t,r)=>t+r.sale+r.disc+r.code,0),a=v.rows.reduce((t,r)=>t+r.aff,0),ao=v.rows.filter(r=>r.aff!==0).length;return{week_start_date:v.ws,week_end_date:v.we,sale:s,affiliate:a,'affiliate/sale':s?a/s*-1:0,pct_affiliate_order:v.rows.length?ao/v.rows.length:0}})}
-async function processTikTok(files){let rows=[];for(const f of files)rows=rows.concat(await readExcel(f));if(!rows[0]||!('Order created time' in rows[0]))throw new Error('Format ไฟล์ TikTok ไม่ถูกต้อง');const mapped=rows.filter(r=>r['Total Revenue']).map(r=>{const w=getWeek(r['Order created time']);if(!w)return null;const a=(r['Affiliate Commission']||0)+(r['Affiliate partner commission']||0)+(r['Affiliate Shop Ads commission']||0)+(r['Affiliate Partner shop ads commission']||0);return{wk:w.key,ws:w.week_start,we:w.week_end,sale:r['Subtotal after seller discounts']||0,aff:a}}).filter(Boolean);return grp(mapped,v=>{const s=v.rows.reduce((t,r)=>t+r.sale,0),a=v.rows.reduce((t,r)=>t+r.aff,0),ao=v.rows.filter(r=>r.aff!==0).length;return{week_start_date:v.ws,week_end_date:v.we,sale:s,affiliate:a,'affiliate/sale':s?a/s*-1:0,pct_affiliate_order:v.rows.length?ao/v.rows.length:0}})}
-async function processLazada(files){let rows=[];for(const f of files)rows=rows.concat(await readExcel(f));const isTH=rows[0]&&'ชื่อรายการธุรกรรม' in rows[0],isEN=rows[0]&&'Fee Name' in rows[0];if(!isTH&&!isEN)throw new Error('Format ไฟล์ Lazada ไม่ถูกต้อง');const thMap={'ค่าบริการโปรโมทสินค้า':'Sponsored Affiliates','ยอดรวมค่าสินค้า':'Item Price Credit','หักค่าคูปองส่งเสริมการขายจากผู้ขาย':'Promotional Charges Vouchers','ส่วนลด LazCoins':'LazCoins Discount','หักเงินค่าสินค้า (คืนสินค้า)':'Reversal Item Price','คืนค่าโปรโมชั่นส่งเสริมการขายเนื่องจากการคืนสินค้า':'Reversal Promotional Charges Vouchers','คืนค่าส่วนลด LazCoins':'Reversal of LazCoins Discount'};const pivot={};for(const r of rows){const id=String(isTH?r['หมายเลขคำสั่งซื้อ']:r['Order Number']||''),date=isTH?r['วันที่สร้างคำสั่งซื้อ']:r['Order Creation Date'];let txn=isTH?r['ชื่อรายการธุรกรรม']:r['Fee Name'];const amt=Number(isTH?r['จำนวนเงิน(รวมภาษี)']:r['Amount(Include Tax)'])||0;if(!id||!txn)continue;if(isTH&&thMap[txn])txn=thMap[txn];if(!pivot[id])pivot[id]={date};pivot[id][txn]=(pivot[id][txn]||0)+amt}const mapped=Object.values(pivot).map(row=>{const w=getWeek(row.date);if(!w)return null;const s=(row['Item Price Credit']||0)+(row['Promotional Charges Vouchers']||0)+(row['LazCoins Discount']||0)+(row['Reversal Item Price']||0)+(row['Reversal Promotional Charges Vouchers']||0)+(row['Reversal of LazCoins Discount']||0),a=row['Sponsored Affiliates']||0;return{wk:w.key,ws:w.week_start,we:w.week_end,sale:s,aff:a}}).filter(Boolean);return grp(mapped,v=>{const s=v.rows.reduce((t,r)=>t+r.sale,0),a=v.rows.reduce((t,r)=>t+r.aff,0),ao=v.rows.filter(r=>r.aff!==0).length;return{week_start_date:v.ws,week_end_date:v.we,sale:s,affiliate:a,'affiliate/sale':s?a/s*-1:0,pct_affiliate_order:v.rows.length?ao/v.rows.length:0}})}
-function plotCharts(d){const C={shopee:'#f97316',tiktok:'#a78bfa',lazada:'#38bdf8'},L={paper_bgcolor:'transparent',plot_bgcolor:'transparent',font:{family:'Sarabun',color:'#888',size:11},margin:{t:5,r:10,b:50,l:45},legend:{orientation:'h',y:-0.3,bgcolor:'transparent'},xaxis:{tickangle:-45,gridcolor:'#222',tickfont:{size:9},linecolor:'#333'},yaxis:{gridcolor:'#222',tickformat:'.1%',linecolor:'#333'}};const t1=[],t2=[];for(const[p,rows]of Object.entries(d)){const x=rows.map(r=>r.week_end_date);t1.push({x,y:rows.map(r=>r['affiliate/sale']),mode:'lines+markers',name:p,line:{color:C[p],width:2},marker:{size:5,color:C[p]}});t2.push({x,y:rows.map(r=>r.pct_affiliate_order),mode:'lines+markers',name:p,line:{color:C[p],width:2},marker:{size:5,color:C[p]}})}Plotly.newPlot('chart1',t1,L,{responsive:true,displayModeBar:false});Plotly.newPlot('chart2',t2,{...L,yaxis:{...L.yaxis,tickformat:'.0%'}},{responsive:true,displayModeBar:false})}
-function md(t){return t.replace(/^### (.+)$/gm,'<h3>$1</h3>').replace(/^## (.+)$/gm,'<h2>$1</h2>').replace(/^# (.+)$/gm,'<h1>$1</h1>').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>').replace(/`(.+?)`/g,'<code>$1</code>').replace(/^---$/gm,'<hr>').replace(/^\|(.+)\|$/gm,m=>{const c=m.split('|').slice(1,-1);if(c.every(x=>x.trim().match(/^[-:]+$/)))return'';return'<tr>'+c.map(x=>'<td>'+x.trim()+'</td>').join('')+'</tr>'}).replace(/(<tr>[\s\S]*?<\/tr>\n?)+/g,m=>{const rows=m.trim().split('\n').filter(Boolean);const h='<tr>'+(rows[0].match(/<td>(.*?)<\/td>/g)||[]).map(c=>c.replace(/td/g,'th')).join('')+'</tr>';return'<table>'+h+rows.slice(1).join('')+'</table>'}).replace(/^[-*] (.+)$/gm,'<li>$1</li>').replace(/(<li>.*<\/li>\n?)+/g,m=>'<ul>'+m+'</ul>').replace(/\n\n/g,'</p><p>').replace(/^(?!<[hultpc\/])(.+)$/gm,'<p>$1</p>').replace(/<p><\/p>/g,'')}
-async function runAnalysis(){hideError();document.getElementById('results').classList.remove('visible');const btn=document.getElementById('btn-analyze');btn.disabled=true;const ai={},ch={};try{if(uploadedFiles.shopee.length){setStatus('กำลังอ่านไฟล์ Shopee...');const d=await processShopee(uploadedFiles.shopee);ai.shopee=d;ch.shopee=d}if(uploadedFiles.tiktok.length){setStatus('กำลังอ่านไฟล์ TikTok...');const d=await processTikTok(uploadedFiles.tiktok);ai.tiktok=d;ch.tiktok=d}if(uploadedFiles.lazada.length){setStatus('กำลังอ่านไฟล์ Lazada...');const d=await processLazada(uploadedFiles.lazada);ai.lazada=d;ch.lazada=d}setStatus('กำลังส่งข้อมูลให้ AI วิเคราะห์...');document.getElementById('results').classList.add('visible');plotCharts(ch);document.getElementById('ai-output').innerHTML='<span style="color:#888">⏳ AI กำลังวิเคราะห์ข้อมูล...</span>';const res=await fetch('/.netlify/functions/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:ai})});if(!res.ok){const e=await res.json();throw new Error(e.error||'เกิดข้อผิดพลาดจาก API')}const r=await res.json();document.getElementById('ai-output').innerHTML=md(r.analysis);hideStatus();document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'})}catch(e){hideStatus();showError(e.message)}btn.disabled=false;updateButton()}
-</script>
+  </div>
+
+  <script>
+    // Logic การจัดการวันที่เหมือนใน Python (Grouping by Week)
+    function getWeekStart(dateStr) {
+        const date = new Date(dateStr);
+        if (isNaN(date)) return "Unknown";
+        const day = date.getDay(), diff = date.getDate() - day + (day == 0 ? -6 : 1);
+        return new Date(date.setDate(diff)).toISOString().split('T')[0];
+    }
+
+    async function parseExcel(file, config) {
+        const data = await file.arrayBuffer();
+        const workbook = XLSX.read(data);
+        const sheet = workbook.Sheets[config.sheetName || workbook.SheetNames[0]];
+        if (!sheet) return [];
+        const rawJson = XLSX.utils.sheet_to_json(sheet, { range: config.skipRows || 0 });
+        
+        // กรองเฉพาะ Column ที่จำเป็นเหมือนใน Python
+        return rawJson.map(row => ({
+            week_start: getWeekStart(row[config.colDate]),
+            sale: parseFloat(row[config.colSale] || 0),
+            affiliate: parseFloat(row[config.colAff] || 0)
+        }));
+    }
+
+    async function run() {
+        const btn = document.getElementById('btn-run');
+        const status = document.getElementById('status');
+        const outputCard = document.getElementById('output-card');
+        const outputText = document.getElementById('output-text');
+        
+        btn.disabled = true;
+        status.innerText = "กำลังประมวลผลไฟล์...";
+
+        try {
+            const dataPayload = {};
+            
+            // Shopee: Skip 5, Sheet Income
+            const shopeeFiles = document.getElementById('file-shopee').files;
+            if (shopeeFiles.length) {
+                dataPayload.shopee = await Promise.all([...shopeeFiles].map(f => 
+                    parseExcel(f, { skipRows: 5, sheetName: 'Income', colDate: 'วันที่ทำการสั่งซื้อ', colSale: 'สินค้าราคาปกติ', colAff: 'ค่าคอมมิชชั่น AMS' })
+                ));
+            }
+
+            // TikTok
+            const tiktokFiles = document.getElementById('file-tiktok').files;
+            if (tiktokFiles.length) {
+                dataPayload.tiktok = await Promise.all([...tiktokFiles].map(f => 
+                    parseExcel(f, { colDate: 'Time', colSale: 'Original Price', colAff: 'Affiliate Commission' })
+                ));
+            }
+
+            // Lazada
+            const lazadaFiles = document.getElementById('file-lazada').files;
+            if (lazadaFiles.length) {
+                dataPayload.lazada = await Promise.all([...lazadaFiles].map(f => 
+                    parseExcel(f, { colDate: 'Order Date', colSale: 'Unit Price', colAff: 'Affiliate Fee' })
+                ));
+            }
+
+            status.innerText = "AI กำลังคิดแม่งเลย... แป๊บเดียวพี่";
+            const response = await fetch('/.netlify/functions/analyze', {
+                method: 'POST',
+                body: JSON.stringify({ data: dataPayload })
+            });
+
+            const result = await response.json();
+            outputCard.style.display = 'block';
+            outputText.innerHTML = `<pre>${result.analysis}</pre>`;
+            status.innerText = "วิเคราะห์เสร็จแล้วพี่!";
+        } catch (err) {
+            status.innerText = "Error: " + err.message;
+        } finally {
+            btn.disabled = false;
+        }
+    }
+  </script>
 </body>
 </html>
